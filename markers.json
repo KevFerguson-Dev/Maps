@@ -1,0 +1,14 @@
+[
+  {
+    "id": "paisley",
+    "title": "Paisley office",
+    "lat": 55.8466,
+    "lng": -4.4231
+  },
+  {
+    "id": "glasgow",
+    "title": "Glasgow (test marker)",
+    "lat": 55.8642,
+    "lng": -4.2518
+  }
+]
