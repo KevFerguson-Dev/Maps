@@ -4,28 +4,95 @@
     <meta charset="utf-8" />
     <title>Auto Map Test</title>
     <style>
-      #map { height: 100vh; width: 100%; }
-      html, body { margin:0; padding:0; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+      #map {
+        height: 100%;
+        width: 100%;
+      }
     </style>
   </head>
   <body>
     <div id="map"></div>
 
     <script>
+      let map;
+      const markersById = {};
+
+      async function loadMarkers() {
+        try {
+          // cachebuster so the browser doesn’t reuse an old file
+          const response = await fetch('markers.json?nocache=' + Date.now());
+
+          if (!response.ok) {
+            console.error('Failed to fetch markers.json', response.status);
+            return;
+          }
+
+          const data = await response.json();
+
+          const idsFromData = new Set();
+
+          data.forEach(m => {
+            if (m.id == null || m.lat == null || m.lng == null) {
+              return;
+            }
+
+            const id = String(m.id);
+            idsFromData.add(id);
+
+            if (!markersById[id]) {
+              // new marker
+              const marker = new google.maps.Marker({
+                position: { lat: m.lat, lng: m.lng },
+                map,
+                title: m.title || ''
+              });
+              markersById[id] = marker;
+            } else {
+              // update existing marker (position/title)
+              markersById[id].setPosition({ lat: m.lat, lng: m.lng });
+              markersById[id].setTitle(m.title || '');
+            }
+          });
+
+          // remove markers that no longer exist in the JSON
+          Object.keys(markersById).forEach(id => {
+            if (!idsFromData.has(id)) {
+              markersById[id].setMap(null);
+              delete markersById[id];
+            }
+          });
+        } catch (err) {
+          console.error('Error loading markers.json', err);
+        }
+      }
+
       function initMap() {
-        const center = { lat: 55.86, lng: -4.25 }; // Glasgow-ish
-        const map = new google.maps.Map(document.getElementById("map"), {
-          zoom: 9,
-          center
+        const center = { lat: 55.8642, lng: -4.2518 }; // Glasgow-ish
+
+        map = new google.maps.Map(document.getElementById('map'), {
+          center,
+          zoom: 9
         });
 
-        new google.maps.Marker({ position: center, map, title: "Test marker" });
+        // initial load
+        loadMarkers();
+        // refresh every 15 seconds
+        setInterval(loadMarkers, 15000);
       }
+
+      // expose initMap for the Google Maps callback
       window.initMap = initMap;
     </script>
+
 
     <script async
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD-CfD4b9yHyczNhTUXC0hWe-TpIFq2QqY&callback=initMap">
     </script>
   </body>
 </html>
+
