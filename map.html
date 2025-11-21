@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Auto Map Test</title>
+    <style>
+      #map { height: 100vh; width: 100%; }
+      html, body { margin:0; padding:0; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script>
+      function initMap() {
+        const center = { lat: 55.86, lng: -4.25 }; // Glasgow-ish
+        const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 9,
+          center
+        });
+
+        new google.maps.Marker({ position: center, map, title: "Test marker" });
+      }
+      window.initMap = initMap;
+    </script>
+
+    <script async
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD-CfD4b9yHyczNhTUXC0hWe-TpIFq2QqY&callback=initMap">
+    </script>
+  </body>
+</html>
